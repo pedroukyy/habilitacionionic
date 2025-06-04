@@ -17,6 +17,6 @@ export const environment = {
     anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmY3FkZGtwbWFrcXptemlxamxlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg5OTc5MjcsImV4cCI6MjA2NDU3MzkyN30.Gf59pj3oPsmYa9JB7nXKSI-3lE85GS0y2plMW_K05Ss" // Considera usar claves diferentes para producción si es necesario
   },
   mapboxConfig: {
-    accessToken: "TU_ACCESS_TOKEN_MAPBOX_PRODUCCION" // <-- REEMPLAZA ESTO CON TU TOKEN REAL DE MAPBOX PARA PRODUCCIÓN
+    accessToken: "pk.eyJ1IjoicGVkcm91c2t5IiwiYSI6ImNtYmhnb2sxYjBhNnUyb3B0Nm5hNjh6ZXgifQ.vPCiv5G6V95iqZNOZlGpGw" // <-- REEMPLAZA ESTO CON TU TOKEN REAL DE MAPBOX PARA PRODUCCIÓN
   }
 };
