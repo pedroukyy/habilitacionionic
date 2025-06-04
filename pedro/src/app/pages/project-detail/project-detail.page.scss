@@ -1,0 +1,30 @@
+    // src/app/pages/project-detail/project-detail.page.scss
+    ion-card-title {
+      font-size: 1.4em;
+    }
+
+    ion-card-subtitle ion-chip {
+      font-size: 0.8em;
+      height: auto;
+      padding: 4px 8px;
+      margin-top: 4px;
+    }
+
+    ion-card-content p {
+      margin-bottom: 8px;
+      color: var(--ion-color-step-600, #666); // Un color de texto un poco más suave
+    }
+
+    ion-card-content p strong {
+      color: var(--ion-color-step-800, #333); // Títulos de sección un poco más oscuros
+    }
+
+    #mapDetail {
+      border: 1px solid var(--ion-color-step-200, #e0e0e0);
+    }
+
+    .attachment-item h3 {
+      white-space: normal;
+      word-break: break-word;
+    }
+    

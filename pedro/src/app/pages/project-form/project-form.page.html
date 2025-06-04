@@ -1,0 +1,148 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/project-list"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ pageTitle }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="saveProject()" [disabled]="projectForm.invalid && projectForm.touched" fill="solid" color="light" shape="round" aria-label="Guardar proyecto">
+        <ion-icon slot="start" name="save-outline" aria-hidden="true"></ion-icon>
+        Guardar
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <form [formGroup]="projectForm" (ngSubmit)="saveProject()">
+    <ion-list lines="full" class="ion-padding-bottom">
+      <ion-item>
+        <ion-label position="stacked">Nombre del Proyecto <ion-text color="danger">*</ion-text></ion-label>
+        <ion-input formControlName="name" type="text" placeholder="Ej: Desarrollo App Móvil" required></ion-input>
+        <ion-note slot="error" *ngIf="projectForm.get('name')?.hasError('required') && projectForm.get('name')?.touched">
+          El nombre es requerido.
+        </ion-note>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Descripción <ion-text color="danger">*</ion-text></ion-label>
+        <ion-textarea formControlName="description" placeholder="Detalles del proyecto..." autoGrow="true" rows="4" required></ion-textarea>
+        <ion-note slot="error" *ngIf="projectForm.get('description')?.hasError('required') && projectForm.get('description')?.touched">
+          La descripción es requerida.
+        </ion-note>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Fecha de Entrega <ion-text color="danger">*</ion-text></ion-label>
+        <ion-datetime-button datetime="deliveryDatetime"></ion-datetime-button>
+        <ion-modal [keepContentsMounted]="true" class="datetime-modal">
+          <ng-template>
+            <ion-datetime
+              id="deliveryDatetime"
+              formControlName="deliveryDate"
+              presentation="date"
+              (ionChange)="confirmDate($event)"
+              (ionCancel)="cancelDateChanges($event)"
+              min="2020-01-01"
+              max="2050-12-31"
+            >
+              <span slot="title">Seleccionar Fecha de Entrega</span>
+              <ion-buttons slot="buttons">
+                <ion-button color="danger" (click)="cancelDateChanges($event)">Cancelar</ion-button>
+                <ion-button color="primary" (click)="confirmDate($event)">Aceptar</ion-button>
+              </ion-buttons>
+            </ion-datetime>
+          </ng-template>
+        </ion-modal>
+        <ion-note slot="helper">{{ formattedDeliveryDate }}</ion-note>
+         <ion-note slot="error" *ngIf="projectForm.get('deliveryDate')?.hasError('required') && projectForm.get('deliveryDate')?.touched">
+          La fecha de entrega es requerida.
+        </ion-note>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Estado <ion-text color="danger">*</ion-text></ion-label>
+        <ion-select formControlName="status" interface="action-sheet" placeholder="Seleccionar estado">
+          <ion-select-option value="pending">Pendiente</ion-select-option>
+          <ion-select-option value="active">Activo</ion-select-option>
+          <ion-select-option value="completed">Finalizado</ion-select-option>
+        </ion-select>
+        <ion-note slot="error" *ngIf="projectForm.get('status')?.hasError('required') && projectForm.get('status')?.touched">
+          El estado es requerido.
+        </ion-note>
+      </ion-item>
+    </ion-list>
+
+    <!-- Sección de Geolocalización -->
+    <ion-card class="ion-margin-top">
+      <ion-card-header>
+        <ion-card-title>Ubicación del Proyecto</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div #mapContainer style="height: 300px; width: 100%; border-radius: 8px; margin-bottom: 10px; background-color: #f0f0f0;">
+          <div *ngIf="!mapContainer" class="map-placeholder ion-text-center">
+            Cargando mapa...
+          </div>
+        </div>
+        <ion-button expand="block" fill="outline" (click)="getCurrentLocation()">
+          <ion-icon slot="start" name="location-outline" aria-hidden="true"></ion-icon>
+          Obtener Ubicación Actual
+        </ion-button>
+        <div *ngIf="projectLocation" class="ion-text-center ion-padding-top">
+          <small>Lat: {{ projectLocation.lat | number:'1.4-4' }}, Lng: {{ projectLocation.lng | number:'1.4-4' }}</small>
+          <p><small>(Puedes arrastrar el marcador o hacer clic en el mapa para ajustar)</small></p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Sección de Archivos Adjuntos (con Input HTML) -->
+    <ion-card class="ion-margin-top">
+      <ion-card-header>
+        <ion-card-title>Archivos Adjuntos</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <!-- Input HTML oculto -->
+        <input
+          type="file"
+          multiple
+          (change)="handleHtmlFileInput($event)"
+          style="display: none;"
+          #htmlFileInput
+          accept="application/pdf,image/*,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.doc,.docx"
+        />
+        <!-- Botón visible que activa el input oculto -->
+        <ion-button expand="block" fill="outline" (click)="triggerHtmlFileSelect()">
+          <ion-icon slot="start" name="attach-outline" aria-hidden="true"></ion-icon>
+          Seleccionar Archivos
+        </ion-button>
+
+        <div *ngIf="currentAttachments.length > 0" class="ion-margin-top">
+          <ion-label color="medium"><small>Archivos subidos:</small></ion-label>
+          <ion-list lines="none">
+            <ion-item *ngFor="let attachment of currentAttachments; let i = index" class="attachment-item" button (click)="openAttachment(attachment, $event)" [attr.aria-label]="'Abrir adjunto ' + attachment.name">
+              <ion-icon [name]="attachment.type.startsWith('image/') ? 'image-outline' : (attachment.type === 'application/pdf' ? 'document-text-outline' : 'document-outline')" slot="start" color="primary" aria-hidden="true"></ion-icon>
+              <ion-label>
+                <h3 style="font-size: 0.9em;">{{ attachment.name }}</h3>
+                <p style="font-size: 0.7em;">{{ attachment.size }} KB - {{ attachment.type }}</p>
+              </ion-label>
+              <ion-button fill="clear" color="danger" (click)="confirmRemoveAttachment(i, $event)" slot="end" [attr.aria-label]="'Eliminar adjunto ' + attachment.name">
+                <ion-icon slot="icon-only" name="trash-outline" aria-hidden="true"></ion-icon>
+              </ion-button>
+            </ion-item>
+          </ion-list>
+        </div>
+        <div *ngIf="currentAttachments.length === 0" class="ion-text-center ion-padding-top">
+          <small>Ningún archivo adjunto.</small>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="ion-padding">
+      <ion-button expand="block" type="submit" [disabled]="projectForm.invalid" (click)="saveProject()">
+        <ion-icon slot="start" name="save-outline" aria-hidden="true"></ion-icon>
+        {{ isEditMode ? 'Actualizar Proyecto' : 'Crear Proyecto' }}
+      </ion-button>
+    </div>
+
+  </form>
+</ion-content>

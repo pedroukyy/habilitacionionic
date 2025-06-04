@@ -1,0 +1,31 @@
+  // src/app/pages/project-form/project-form.page.scss
+    ion-card-content {
+      padding-bottom: 16px; // Un poco más de espacio al final del card content
+    }
+
+    .map-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      background-color: #f0f0f0;
+      color: #888;
+      border-radius: 8px;
+    }
+
+    .attachment-item h3 {
+      white-space: normal; // Permitir que el nombre del archivo se ajuste
+      word-break: break-word;
+    }
+
+    ion-datetime-button {
+        width: 100%; // Hacer que el botón de fecha ocupe todo el ancho
+        // justify-content: flex-start; // Alinear el texto a la izquierda si es necesario
+    }
+
+    ion-modal.datetime-modal {
+      --height: auto; // Ajustar altura del modal de fecha
+      --width: auto;
+      --border-radius: 10px;
+    }
+    
