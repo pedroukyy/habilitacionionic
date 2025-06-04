@@ -18,7 +18,7 @@ import { Subscription } from 'rxjs';
 import mapboxgl from 'mapbox-gl';
 import { environment } from '../../../environments/environment';
 
-// Importar addIcons y los iconos específicos
+
 import { addIcons } from 'ionicons';
 import {
   saveOutline,
@@ -26,11 +26,11 @@ import {
   attachOutline,
   imageOutline,
   documentTextOutline,
-  documentOutline, // Icono genérico para documentos
+  documentOutline,
   trashOutline,
-  close // Para el botón de cancelar en action sheet
+  close
 } from 'ionicons/icons';
-import { Capacitor } from '@capacitor/core'; // Para verificar la plataforma
+import { Capacitor } from '@capacitor/core';
 
 @Component({
   selector: 'app-project-form',
@@ -75,7 +75,6 @@ export class ProjectFormPage implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
 
   constructor() {
-    // Registrar iconos
     addIcons({
       saveOutline,
       locationOutline,
@@ -123,7 +122,7 @@ export class ProjectFormPage implements OnInit, OnDestroy {
         next: project => {
             loading.dismiss();
             if (project) {
-                this.projectForm.patchValue({ // Usar patchValue para evitar errores si faltan campos
+                this.projectForm.patchValue({
                     name: project.name,
                     description: project.description,
                     deliveryDate: project.deliveryDate,
@@ -132,7 +131,7 @@ export class ProjectFormPage implements OnInit, OnDestroy {
                 this.currentAttachments = project.attachments ? [...project.attachments] : [];
                 if (project.location) {
                     this.projectLocation = project.location;
-                    // Asegurarse de que el mapa se inicialice después de que la vista esté lista
+
                     setTimeout(() => {
                         if (this.mapContainer?.nativeElement) {
                            this.initializeMap(this.projectLocation!.lng, this.projectLocation!.lat);
@@ -165,7 +164,7 @@ export class ProjectFormPage implements OnInit, OnDestroy {
       return;
     }
     if (!this.mapContainer?.nativeElement) {
-      // Reintentar si el contenedor no está listo, común si está dentro de un *ngIf
+
       setTimeout(() => this.initializeMap(lng, lat, zoom), 150);
       return;
     }
@@ -198,7 +197,7 @@ export class ProjectFormPage implements OnInit, OnDestroy {
     await loading.present();
 
     if (!Capacitor.isNativePlatform() && navigator.geolocation) {
-        // Web Geolocation
+        
         navigator.geolocation.getCurrentPosition(
           (position) => {
             loading.dismiss();
