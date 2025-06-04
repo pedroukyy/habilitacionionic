@@ -1,14 +1,14 @@
 // src/app/pages/project-detail/project-detail.page.ts
 import { Component, OnInit, OnDestroy, inject, ElementRef, ViewChild, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms'; // FormsModule no parece usarse, se podría quitar de imports
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {
   NavController,
   LoadingController,
   AlertController,
   ActionSheetController,
-  ToastController, // Importar ToastController
+  ToastController,
   IonHeader,
   IonToolbar,
   IonTitle,
@@ -27,12 +27,10 @@ import {
   IonChip,
   IonNote,
   IonBackButton,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonSpinner, // Importar IonSpinner
-  IonRefresher, // Importar IonRefresher
-  IonRefresherContent // Importar IonRefresherContent
+  IonSpinner,
+  IonRefresher,
+  IonRefresherContent
+  // IonGrid, IonRow, IonCol, // Comentados ya que no se usan en el HTML proporcionado
 } from '@ionic/angular/standalone';
 
 import { FirestoreService, Project, Attachment } from '../../services/firestore.service';
@@ -42,6 +40,7 @@ import { SupabaseStorageService } from '../../services/supabase-storage.service'
 import { Subscription } from 'rxjs';
 import mapboxgl from 'mapbox-gl';
 import { environment } from '../../../environments/environment';
+import { Timestamp } from '@angular/fire/firestore'; // Importar Timestamp
 
 import { addIcons } from 'ionicons';
 import {
@@ -49,7 +48,6 @@ import {
   imageOutline, documentOutline, downloadOutline, eyeOutline, mapOutline, listOutline,
   closeCircleOutline
 } from 'ionicons/icons';
-// import { Capacitor } from '@capacitor/core'; // No se usa directamente aquí, pero puede ser útil
 
 @Component({
   selector: 'app-project-detail',
@@ -57,17 +55,21 @@ import {
   styleUrls: ['./project-detail.page.scss'],
   standalone: true,
   imports: [
-    CommonModule, FormsModule, RouterModule, DatePipe,
+    CommonModule, /* FormsModule, // Quitado si no se usa */ RouterModule, DatePipe,
     IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel,
     IonButton, IonIcon, IonButtons, IonCard, IonCardHeader, IonCardTitle,
     IonCardSubtitle, IonCardContent, IonChip, IonNote, IonBackButton,
-    IonGrid, IonRow, IonCol, IonSpinner, IonRefresher, IonRefresherContent // Añadir IonSpinner, IonRefresher, IonRefresherContent
+    IonSpinner, IonRefresher, IonRefresherContent
+    // Quitar IonGrid, IonRow, IonCol si no se usan
   ]
 })
 export class ProjectDetailPage implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('mapDetailContainer', { static: false }) mapDetailContainer!: ElementRef;
 
-  project: Project | null = null;
+  project: Project | null = null; // Mantiene los datos originales del servicio
+  // displayProject se usará en la plantilla para las fechas formateadas
+  displayProject: (Project & { createdAtJS?: Date; updatedAtJS?: Date; attachmentsJS?: (Attachment & { uploadedAtJS?: Date })[] }) | null = null;
+
   projectId: string | null = null;
   isLoading = true;
   private routeSub!: Subscription;
@@ -83,7 +85,7 @@ export class ProjectDetailPage implements OnInit, OnDestroy, AfterViewInit {
   private loadingCtrl = inject(LoadingController);
   private alertCtrl = inject(AlertController);
   private actionSheetCtrl = inject(ActionSheetController);
-  private toastCtrl = inject(ToastController); // <<< --- Inyección añadida
+  private toastCtrl = inject(ToastController);
   private navCtrl = inject(NavController);
   private cdr = inject(ChangeDetectorRef);
 
@@ -111,13 +113,56 @@ export class ProjectDetailPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // El mapa se inicializará después de que los datos del proyecto se carguen
+    // La inicialización del mapa se maneja dentro de loadProjectDetails después de que los datos están listos
   }
 
   ngOnDestroy() {
     if (this.routeSub) this.routeSub.unsubscribe();
     if (this.projectSub) this.projectSub.unsubscribe();
     if (this.map) this.map.remove();
+  }
+
+  private convertProjectTimestamps(projectData: Project): Project & { createdAtJS?: Date; updatedAtJS?: Date; attachmentsJS?: (Attachment & { uploadedAtJS?: Date })[] } {
+    const displayData: any = { ...projectData }; // Clonar el objeto
+
+    // Convertir createdAt
+    if (projectData.createdAt) {
+      if (projectData.createdAt instanceof Timestamp) {
+        displayData.createdAtJS = projectData.createdAt.toDate();
+      } else if (typeof projectData.createdAt === 'string' || projectData.createdAt instanceof Date) {
+        // Si ya es un string ISO o un objeto Date de JS, el pipe 'date' puede manejarlo.
+        // Para consistencia, lo asignamos a createdAtJS.
+        displayData.createdAtJS = new Date(projectData.createdAt as any);
+      }
+    }
+
+    // Convertir updatedAt
+    if (projectData.updatedAt) {
+      if (projectData.updatedAt instanceof Timestamp) {
+        displayData.updatedAtJS = projectData.updatedAt.toDate();
+      } else if (typeof projectData.updatedAt === 'string' || projectData.updatedAt instanceof Date) {
+        displayData.updatedAtJS = new Date(projectData.updatedAt as any);
+      }
+    }
+
+    // Convertir uploadedAt en los attachments
+    if (projectData.attachments && Array.isArray(projectData.attachments)) {
+      displayData.attachmentsJS = projectData.attachments.map(att => {
+        const attJS: any = {...att}; // Clonar el adjunto
+        if (att.uploadedAt) {
+          if (att.uploadedAt instanceof Timestamp) {
+            attJS.uploadedAtJS = att.uploadedAt.toDate();
+          } else if (typeof att.uploadedAt === 'string' || att.uploadedAt instanceof Date) {
+            attJS.uploadedAtJS = new Date(att.uploadedAt as any);
+          }
+        }
+        return attJS;
+      });
+    } else {
+      displayData.attachmentsJS = []; // Asegurar que attachmentsJS sea un array
+    }
+
+    return displayData;
   }
 
   async loadProjectDetails() {
@@ -134,16 +179,21 @@ export class ProjectDetailPage implements OnInit, OnDestroy, AfterViewInit {
         loading.dismiss();
         this.isLoading = false;
         if (data) {
-          this.project = data;
-          this.cdr.detectChanges();
-          if (this.project.location) {
-            setTimeout(() => { // Esperar que el DOM se actualice
+          this.project = data; // Guardar los datos originales
+          this.displayProject = this.convertProjectTimestamps(data); // Crear la versión para mostrar
+          console.log('Project data loaded:', this.project);
+          console.log('Display project data (with JS dates):', this.displayProject);
+          this.cdr.detectChanges(); // Forzar detección de cambios
+
+          if (this.displayProject.location) {
+            // Asegurarse de que el contenedor del mapa esté disponible
+            setTimeout(() => {
                 if (this.mapDetailContainer?.nativeElement) {
-                    this.initializeDetailMap(this.project!.location!.lng, this.project!.location!.lat);
+                    this.initializeDetailMap(this.displayProject!.location!.lng, this.displayProject!.location!.lat);
                 } else {
-                    console.warn('Contenedor del mapa de detalle no encontrado en AfterViewInit para el proyecto:', this.project?.name);
+                    console.warn('Contenedor del mapa de detalle no encontrado para el proyecto:', this.displayProject?.name);
                 }
-            }, 0);
+            }, 0); // Un pequeño retraso puede ayudar si el *ngIf tarda en renderizar el div
           }
         } else {
           this.showErrorAndGoBack('Proyecto no encontrado.');
@@ -179,7 +229,6 @@ export class ProjectDetailPage implements OnInit, OnDestroy, AfterViewInit {
       zoom: zoom,
       interactive: false
     });
-    // this.map.addControl(new mapboxgl.NavigationControl(), 'top-right'); // Opcional para mapa no interactivo
     this.marker = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(this.map);
   }
 
@@ -221,7 +270,7 @@ export class ProjectDetailPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async deleteProjectAndAttachments() {
-    if (!this.project || !this.projectId) return;
+    if (!this.project || !this.projectId) return; // Usar this.project para acceder a los adjuntos
     const loading = await this.loadingCtrl.create({ message: 'Eliminando proyecto...' });
     await loading.present();
     try {
@@ -262,11 +311,17 @@ export class ProjectDetailPage implements OnInit, OnDestroy, AfterViewInit {
 
   async handleRefresh(event: any) {
     if (this.projectId) {
-      await this.loadProjectDetails(); // loadProjectDetails ya maneja el loader
-    }
-    if (event?.target?.complete) {
-      event.target.complete();
+      // No es necesario llamar a loadingCtrl.create aquí si loadProjectDetails ya lo hace.
+      // Simplemente llamamos a loadProjectDetails.
+      this.loadProjectDetails().finally(() => {
+        if (event?.target?.complete) {
+          event.target.complete();
+        }
+      });
+    } else {
+      if (event?.target?.complete) {
+        event.target.complete();
+      }
     }
   }
 }
-

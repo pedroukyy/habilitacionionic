@@ -1,99 +1,102 @@
-    <ion-header [translucent]="true">
-      <ion-toolbar color="primary">
-        <ion-buttons slot="start">
-          <ion-back-button defaultHref="/project-list"></ion-back-button>
-        </ion-buttons>
-        <ion-title>{{ project ? project.name : 'Detalle del Proyecto' }}</ion-title>
-        <ion-buttons slot="end" *ngIf="project">
-          <ion-button (click)="editProject()" aria-label="Editar proyecto">
-            <ion-icon slot="icon-only" name="create-outline"></ion-icon>
-          </ion-button>
-          <ion-button (click)="confirmDeleteProject()" aria-label="Eliminar proyecto" color="danger">
-            <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/project-list"></ion-back-button>
+    </ion-buttons>
+    <!-- Usar displayProject para el título también, una vez que esté cargado -->
+    <ion-title>{{ displayProject ? displayProject.name : (project ? project.name : 'Detalle del Proyecto') }}</ion-title>
+    <ion-buttons slot="end" *ngIf="displayProject"> <!-- Usar displayProject para condicionar los botones -->
+      <ion-button (click)="editProject()" aria-label="Editar proyecto">
+        <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="confirmDeleteProject()" aria-label="Eliminar proyecto" color="danger">
+        <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
 
-    <ion-content [fullscreen]="true">
-      <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
-        <ion-refresher-content></ion-refresher-content>
-      </ion-refresher>
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
 
-      <div *ngIf="isLoading" class="ion-padding ion-text-center">
-        <ion-spinner name="crescent"></ion-spinner>
-        <p>Cargando detalles...</p>
-      </div>
+  <div *ngIf="isLoading" class="ion-padding ion-text-center">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando detalles...</p>
+  </div>
 
-      <div *ngIf="!isLoading && !project" class="ion-padding ion-text-center">
-        <p>No se pudo cargar la información del proyecto.</p>
-        <ion-button routerLink="/project-list" routerDirection="root">Volver a la lista</ion-button>
-      </div>
+  <!-- Condición principal ahora usa displayProject -->
+  <div *ngIf="!isLoading && !displayProject" class="ion-padding ion-text-center">
+    <p>No se pudo cargar la información del proyecto.</p>
+    <ion-button routerLink="/project-list" routerDirection="root">Volver a la lista</ion-button>
+  </div>
 
-      <div *ngIf="!isLoading && project">
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>{{ project.name }}</ion-card-title>
-            <ion-card-subtitle>
-              Estado: <ion-chip [color]="project.status === 'completed' ? 'success' : (project.status === 'active' ? 'warning' : 'medium')">
-                        <ion-label>{{ project.status }}</ion-label>
-                      </ion-chip>
-            </ion-card-subtitle>
-          </ion-card-header>
-          <ion-card-content>
-            <p><strong>Descripción:</strong></p>
-            <p style="white-space: pre-wrap;">{{ project.description }}</p>
-            <p class="ion-margin-top"><strong>Fecha de Entrega:</strong> {{ project.deliveryDate | date:'fullDate' }}</p>
-            <p *ngIf="project.createdAt"><strong>Creado:</strong> {{ project.createdAt?.toDate() | date:'medium' }}</p>
-            <p *ngIf="project.updatedAt"><strong>Última Actualización:</strong> {{ project.updatedAt?.toDate() | date:'medium' }}</p>
-          </ion-card-content>
-        </ion-card>
+  <!-- Mostrar detalles usando displayProject -->
+  <div *ngIf="!isLoading && displayProject">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ displayProject.name }}</ion-card-title>
+        <ion-card-subtitle>
+          Estado: <ion-chip [color]="displayProject.status === 'completed' ? 'success' : (displayProject.status === 'active' ? 'warning' : 'medium')">
+                    <ion-label>{{ displayProject.status }}</ion-label>
+                  </ion-chip>
+        </ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p><strong>Descripción:</strong></p>
+        <p style="white-space: pre-wrap;">{{ displayProject.description }}</p>
+        <p class="ion-margin-top"><strong>Fecha de Entrega:</strong> {{ displayProject.deliveryDate | date:'fullDate' }}</p>
+        <!-- Usar las propiedades con sufijo JS para las fechas convertidas -->
+        <p *ngIf="displayProject.createdAtJS"><strong>Creado:</strong> {{ displayProject.createdAtJS | date:'medium' }}</p>
+        <p *ngIf="displayProject.updatedAtJS"><strong>Última Actualización:</strong> {{ displayProject.updatedAtJS | date:'medium' }}</p>
+      </ion-card-content>
+    </ion-card>
 
-        <!-- Sección de Ubicación -->
-        <ion-card *ngIf="project.location">
-          <ion-card-header>
-            <ion-card-title>Ubicación</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <div #mapDetailContainer id="mapDetail" style="height: 250px; width: 100%; border-radius: 8px; background-color: #f0f0f0;">
-              <!-- El mapa se renderizará aquí -->
-            </div>
-            <div class="ion-text-center ion-padding-top">
-              <small>Lat: {{ project.location.lat | number:'1.4-4' }}, Lng: {{ project.location.lng | number:'1.4-4' }}</small>
-              <p *ngIf="project.location.address"><small>{{ project.location.address }}</small></p>
-            </div>
-          </ion-card-content>
-        </ion-card>
-        <ion-card *ngIf="!project.location">
-            <ion-card-content class="ion-text-center">
-                <ion-note>No se ha especificado una ubicación para este proyecto.</ion-note>
-            </ion-card-content>
-        </ion-card>
+    <!-- Sección de Ubicación -->
+    <ion-card *ngIf="displayProject.location">
+      <ion-card-header>
+        <ion-card-title>Ubicación</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div #mapDetailContainer id="mapDetail" style="height: 250px; width: 100%; border-radius: 8px; background-color: #f0f0f0;">
+        </div>
+        <div class="ion-text-center ion-padding-top">
+          <small>Lat: {{ displayProject.location.lat | number:'1.4-4' }}, Lng: {{ displayProject.location.lng | number:'1.4-4' }}</small>
+          <p *ngIf="displayProject.location.address"><small>{{ displayProject.location.address }}</small></p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+    <ion-card *ngIf="!displayProject.location">
+        <ion-card-content class="ion-text-center">
+            <ion-note>No se ha especificado una ubicación para este proyecto.</ion-note>
+        </ion-card-content>
+    </ion-card>
 
-
-        <!-- Sección de Archivos Adjuntos -->
-        <ion-card *ngIf="project.attachments && project.attachments.length > 0">
-          <ion-card-header>
-            <ion-card-title>Archivos Adjuntos</ion-card-title>
-          </ion-card-header>
-          <ion-list lines="inset">
-            <ion-item *ngFor="let attachment of project.attachments" button (click)="openAttachment(attachment)" detail="false">
-              <ion-icon [name]="attachment.type.startsWith('image/') ? 'image-outline' : (attachment.type === 'application/pdf' ? 'document-text-outline' : 'document-outline')" slot="start" color="primary"></ion-icon>
-              <ion-label>
-                <h3>{{ attachment.name }}</h3>
-                <p>{{ attachment.size }} KB - {{ attachment.type }}</p>
-                <p *ngIf="attachment.uploadedAt"><small>Subido: {{ attachment.uploadedAt?.toDate() | date:'short' }}</small></p>
-              </ion-label>
-              <ion-icon name="eye-outline" slot="end" color="medium"></ion-icon>
-            </ion-item>
-          </ion-list>
-        </ion-card>
-        <ion-card *ngIf="!project.attachments || project.attachments.length === 0">
-            <ion-card-content class="ion-text-center">
-                <ion-note>No hay archivos adjuntos para este proyecto.</ion-note>
-            </ion-card-content>
-        </ion-card>
-
-      </div>
-    </ion-content>
-    
+    <!-- Sección de Archivos Adjuntos -->
+    <!-- Usar displayProject.attachmentsJS -->
+    <ion-card *ngIf="displayProject.attachmentsJS && displayProject.attachmentsJS.length > 0">
+      <ion-card-header>
+        <ion-card-title>Archivos Adjuntos</ion-card-title>
+      </ion-card-header>
+      <ion-list lines="inset">
+        <!-- Iterar sobre displayProject.attachmentsJS -->
+        <ion-item *ngFor="let attachment of displayProject.attachmentsJS" button (click)="openAttachment(attachment)" detail="false">
+          <ion-icon [name]="attachment.type.startsWith('image/') ? 'image-outline' : (attachment.type === 'application/pdf' ? 'document-text-outline' : 'document-outline')" slot="start" color="primary"></ion-icon>
+          <ion-label>
+            <h3>{{ attachment.name }}</h3>
+            <p>{{ attachment.size }} KB - {{ attachment.type }}</p>
+            <!-- Usar la propiedad con sufijo JS para la fecha del adjunto -->
+            <p *ngIf="attachment.uploadedAtJS"><small>Subido: {{ attachment.uploadedAtJS | date:'short' }}</small></p>
+          </ion-label>
+          <ion-icon name="eye-outline" slot="end" color="medium"></ion-icon>
+        </ion-item>
+      </ion-list>
+    </ion-card>
+    <ion-card *ngIf="!displayProject.attachmentsJS || displayProject.attachmentsJS.length === 0">
+        <ion-card-content class="ion-text-center">
+            <ion-note>No hay archivos adjuntos para este proyecto.</ion-note>
+        </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
