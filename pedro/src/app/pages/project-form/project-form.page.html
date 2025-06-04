@@ -95,13 +95,13 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- Sección de Archivos Adjuntos (con Input HTML) -->
+    
     <ion-card class="ion-margin-top">
       <ion-card-header>
         <ion-card-title>Archivos Adjuntos</ion-card-title>
       </ion-card-header>
       <ion-card-content>
-        <!-- Input HTML oculto -->
+
         <input
           type="file"
           multiple
@@ -110,7 +110,7 @@
           #htmlFileInput
           accept="application/pdf,image/*,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.doc,.docx"
         />
-        <!-- Botón visible que activa el input oculto -->
+
         <ion-button expand="block" fill="outline" (click)="triggerHtmlFileSelect()">
           <ion-icon slot="start" name="attach-outline" aria-hidden="true"></ion-icon>
           Seleccionar Archivos

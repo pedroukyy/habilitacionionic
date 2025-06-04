@@ -3,9 +3,9 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/project-list"></ion-back-button>
     </ion-buttons>
-    <!-- Usar displayProject para el título también, una vez que esté cargado -->
+
     <ion-title>{{ displayProject ? displayProject.name : (project ? project.name : 'Detalle del Proyecto') }}</ion-title>
-    <ion-buttons slot="end" *ngIf="displayProject"> <!-- Usar displayProject para condicionar los botones -->
+    <ion-buttons slot="end" *ngIf="displayProject">
       <ion-button (click)="editProject()" aria-label="Editar proyecto">
         <ion-icon slot="icon-only" name="create-outline"></ion-icon>
       </ion-button>
@@ -26,13 +26,13 @@
     <p>Cargando detalles...</p>
   </div>
 
-  <!-- Condición principal ahora usa displayProject -->
+
   <div *ngIf="!isLoading && !displayProject" class="ion-padding ion-text-center">
     <p>No se pudo cargar la información del proyecto.</p>
     <ion-button routerLink="/project-list" routerDirection="root">Volver a la lista</ion-button>
   </div>
 
-  <!-- Mostrar detalles usando displayProject -->
+
   <div *ngIf="!isLoading && displayProject">
     <ion-card>
       <ion-card-header>
@@ -47,13 +47,13 @@
         <p><strong>Descripción:</strong></p>
         <p style="white-space: pre-wrap;">{{ displayProject.description }}</p>
         <p class="ion-margin-top"><strong>Fecha de Entrega:</strong> {{ displayProject.deliveryDate | date:'fullDate' }}</p>
-        <!-- Usar las propiedades con sufijo JS para las fechas convertidas -->
+
         <p *ngIf="displayProject.createdAtJS"><strong>Creado:</strong> {{ displayProject.createdAtJS | date:'medium' }}</p>
         <p *ngIf="displayProject.updatedAtJS"><strong>Última Actualización:</strong> {{ displayProject.updatedAtJS | date:'medium' }}</p>
       </ion-card-content>
     </ion-card>
 
-    <!-- Sección de Ubicación -->
+
     <ion-card *ngIf="displayProject.location">
       <ion-card-header>
         <ion-card-title>Ubicación</ion-card-title>
@@ -74,19 +74,19 @@
     </ion-card>
 
     <!-- Sección de Archivos Adjuntos -->
-    <!-- Usar displayProject.attachmentsJS -->
+
     <ion-card *ngIf="displayProject.attachmentsJS && displayProject.attachmentsJS.length > 0">
       <ion-card-header>
         <ion-card-title>Archivos Adjuntos</ion-card-title>
       </ion-card-header>
       <ion-list lines="inset">
-        <!-- Iterar sobre displayProject.attachmentsJS -->
+
         <ion-item *ngFor="let attachment of displayProject.attachmentsJS" button (click)="openAttachment(attachment)" detail="false">
           <ion-icon [name]="attachment.type.startsWith('image/') ? 'image-outline' : (attachment.type === 'application/pdf' ? 'document-text-outline' : 'document-outline')" slot="start" color="primary"></ion-icon>
           <ion-label>
             <h3>{{ attachment.name }}</h3>
             <p>{{ attachment.size }} KB - {{ attachment.type }}</p>
-            <!-- Usar la propiedad con sufijo JS para la fecha del adjunto -->
+            
             <p *ngIf="attachment.uploadedAtJS"><small>Subido: {{ attachment.uploadedAtJS | date:'short' }}</small></p>
           </ion-label>
           <ion-icon name="eye-outline" slot="end" color="medium"></ion-icon>

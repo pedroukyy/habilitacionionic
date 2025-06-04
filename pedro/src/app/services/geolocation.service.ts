@@ -103,7 +103,7 @@ export class GeolocationService {
       };
     } catch (error: any) {
       console.error('Error getting current location (native service):', error);
-      throw error; // Re-lanza el error para que el componente lo maneje
+      throw error; 
     }
   }
 }

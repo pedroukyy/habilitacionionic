@@ -18,15 +18,15 @@
             RouterOutlet,
             IonApp,
             IonRouterOutlet,
-            IonIcon // Importa IonIcon aquí también
+            IonIcon
           ],
         })
         export class AppComponent {
           constructor() {
-            // Registrar los iconos que se usan en app.component.html
+
             addIcons({
-              add: addOutline, // Mapea el nombre 'add' al icono importado
-              // Añade otros iconos globales aquí si los usas en app.component.html
+              add: addOutline,
+              
             });
           }
         }

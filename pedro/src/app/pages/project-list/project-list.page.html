@@ -7,34 +7,10 @@
           <ion-button (click)="goToProjectForm()">
             <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
           </ion-button>
-          <!-- Opcional: Botón para cambiar vista -->
-          <!--
-          <ion-button (click)="toggleViewMode()">
-            <ion-icon slot="icon-only" [name]="viewMode === 'list' ? 'grid-outline' : 'list-outline'"></ion-icon>
-          </ion-button>
-          -->
+
         </ion-buttons>
       </ion-toolbar>
-      <!-- Opcional: Barra de búsqueda y filtros -->
-      <!--
-      <ion-toolbar color="light">
-        <ion-searchbar [(ngModel)]="searchTerm" (ionInput)="searchProjects()" placeholder="Buscar proyecto..."></ion-searchbar>
-      </ion-toolbar>
-      <ion-segment [(ngModel)]="statusFilter" (ionChange)="filterByStatus($event.detail.value)" color="secondary">
-        <ion-segment-button value="all">
-          <ion-label>Todos</ion-label>
-        </ion-segment-button>
-        <ion-segment-button value="active">
-          <ion-label>Activos</ion-label>
-        </ion-segment-button>
-        <ion-segment-button value="completed">
-          <ion-label>Finalizados</ion-label>
-        </ion-segment-button>
-        <ion-segment-button value="pending">
-          <ion-label>Pendientes</ion-label>
-        </ion-segment-button>
-      </ion-segment>
-      -->
+
     </ion-header>
 
     <ion-content [fullscreen]="true">
@@ -59,11 +35,7 @@
         </div>
 
         <ion-list *ngIf="projects.length > 0">
-          <!--
-            Aquí podrías aplicar filtros directamente en el template si no son muy complejos.
-            Ejemplo: *ngFor="let project of projects | filterPipe:searchTerm | statusPipe:statusFilter"
-            O, si los filtros se aplican al observable en el .ts:
-          -->
+         
           <ion-item-sliding *ngFor="let project of projects">
             <ion-item [routerLink]="['/project-detail', project.id]" lines="inset" button detail="true">
               <ion-icon [name]="project.status === 'completed' ? 'checkmark-circle-outline' : (project.status === 'active' ? 'play-circle-outline' : 'hourglass-outline')" slot="start" [color]="project.status === 'completed' ? 'success' : (project.status === 'active' ? 'warning' : 'medium')"></ion-icon>

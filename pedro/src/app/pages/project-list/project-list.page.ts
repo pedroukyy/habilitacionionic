@@ -36,15 +36,15 @@ import { FirestoreService, Project } from '../../services/firestore.service';
 import { addIcons } from 'ionicons';
 import {
   addCircleOutline,
-  addOutline, // 'add' es un alias de 'add-outline' en muchos contextos, pero importamos explícitamente
+  addOutline, 
   checkmarkCircleOutline,
   playCircleOutline,
   hourglassOutline,
   createOutline,
   trashOutline,
   fileTrayStackedOutline,
-  gridOutline, // Para el botón de cambiar vista (opcional)
-  listOutline  // Para el botón de cambiar vista (opcional)
+  gridOutline,
+  listOutline,
 } from 'ionicons/icons';
 
 @Component({
@@ -92,10 +92,7 @@ export class ProjectListPage implements OnInit {
 
   ngOnInit() {}
 
-  // ... (resto de los métodos como goToProjectForm, goToProjectDetail, deleteProject, handleRefresh, etc.)
-  // Asegúrate de que los nombres de los iconos en el HTML coincidan con los importados
-  // Por ejemplo, si usas <ion-icon name="add"></ion-icon>, y has importado addOutline,
-  // Ionicons a menudo mapea 'add' a 'add-outline'.
+
 
   goToProjectForm(projectId?: string) {
     if (projectId) {

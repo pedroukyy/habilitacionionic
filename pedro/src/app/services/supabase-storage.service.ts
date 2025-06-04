@@ -1,8 +1,8 @@
-// src/app/services/supabase-storage.service.ts
+
 import { Injectable } from '@angular/core';
-import { createClient, SupabaseClient } from '@supabase/supabase-js'; // PostgrestError no se usa, se puede quitar si no es necesario
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
-import { Attachment } from './firestore.service'; // Importa la interfaz Attachment
+import { Attachment } from './firestore.service';
 
 @Injectable({
   providedIn: 'root'
@@ -35,7 +35,7 @@ export class SupabaseStorageService {
       }
 
       if (data) {
-        // Obtener la URL pública del archivo subido
+
         const { data: publicUrlData } = this.supabase.storage
           .from(this.bucketName)
           .getPublicUrl(data.path);
@@ -52,8 +52,8 @@ export class SupabaseStorageService {
           url: publicUrlData.publicUrl,
           type: file.type || 'application/octet-stream',
           size: Math.round(file.size / 1024),
-          // CORRECCIÓN APLICADA AQUÍ:
-          uploadedAt: new Date(), // Usar new Date() en lugar de toISOString()
+
+          uploadedAt: new Date(), 
           storagePath: data.path
         };
       } else {

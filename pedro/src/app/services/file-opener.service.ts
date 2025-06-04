@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { FileOpener, FileOpenerOptions } from '@capacitor-community/file-opener';
 import { Capacitor } from '@capacitor/core';
-import { Directory, Filesystem, WriteFileResult } from '@capacitor/filesystem'; // Encoding no se usa, se puede quitar si no es necesario
+import { Directory, Filesystem, WriteFileResult } from '@capacitor/filesystem';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
@@ -12,7 +12,7 @@ import { firstValueFrom } from 'rxjs';
 export class FileOpenerService {
 
   constructor(private http: HttpClient) {
-    // HttpClient ya está proveído globalmente a través de provideHttpClient() en main.ts
+
   }
 
   private getMimeType(fileName: string): string {
@@ -40,7 +40,7 @@ export class FileOpenerService {
       return;
     }
 
-    let writeResult: WriteFileResult | undefined = undefined; // Declarar writeResult aquí
+    let writeResult: WriteFileResult | undefined = undefined;
 
     try {
       console.log('Attempting to download file:', fileUrl);
@@ -53,7 +53,7 @@ export class FileOpenerService {
 
       const base64Data = await this.convertBlobToBase64(blob) as string;
 
-      writeResult = await Filesystem.writeFile({ // Asignar a la variable declarada fuera
+      writeResult = await Filesystem.writeFile({
         path: originalFileName,
         data: base64Data,
         directory: Directory.Cache,
@@ -79,13 +79,12 @@ export class FileOpenerService {
       if (error.message && error.message.includes('Activity not found')) {
         errorMessage = `No se encontró una aplicación para abrir este tipo de archivo (${this.getMimeType(originalFileName)}).`;
       } else if (error.message && error.message.includes('File not found')) {
-        // Ahora writeResult es accesible aquí, aunque podría ser undefined si el error ocurrió antes de Filesystem.writeFile
+
         errorMessage = `Archivo no encontrado en la ruta especificada. (${writeResult?.uri || 'ruta desconocida o error previo a la escritura'})`;
       }
 
-      // Reemplaza este alert con un componente de UI de Ionic (ToastController o AlertController)
-      // Es importante no usar alert() en producción o para una buena UX.
-      if (typeof alert !== 'undefined') { // Comprobación para entornos donde alert no esté disponible (como tests)
+
+      if (typeof alert !== 'undefined') {
         alert(errorMessage);
       } else {
         console.warn('`alert` not available. UI Error Message:', errorMessage);
@@ -99,7 +98,7 @@ export class FileOpenerService {
       const reader = new FileReader();
       reader.onerror = reject;
       reader.onload = () => {
-        resolve(reader.result); // reader.result es string (DataURL) cuando se usa readAsDataURL
+        resolve(reader.result); 
       };
       reader.readAsDataURL(blob);
     });
